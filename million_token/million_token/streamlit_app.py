@@ -1,7 +1,6 @@
 import numpy as np
 import streamlit as st
 import streamlit.components.v1 as components
-import selenium
 from selenium import webdriver
 from dataclasses import dataclass
 from etherscan import get_etherscan_output
@@ -15,9 +14,9 @@ from bscscan import display_bsc_stats
 from polyscan import display_poly_stats
 from all_networks import get_all_networks_output
 from PIL import Image
-from selenium.webdriver.firefox.options import Options
-firefox_options = Options()
-firefox_options.add_argument("--headless")
+# from selenium.webdriver.firefox.options import Options
+# firefox_options = Options()
+# firefox_options.add_argument("--headless")
 
 
 @dataclass
@@ -48,7 +47,7 @@ def show_statistics_all_networks(statistics: Statistics):
 
 @st.cache
 def get_statistics_from_all_networks() -> Statistics:
-    driver = webdriver.Firefox(options=firefox_options)
+    driver = webdriver.Chrome()
     etherscan_stats = get_etherscan_output(driver)
     bscscan_stats = get_bscscan_output(driver)
     polyscan_stats = get_polyscan_output(driver)
