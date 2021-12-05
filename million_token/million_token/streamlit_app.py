@@ -1,6 +1,7 @@
 import numpy as np
 import streamlit as st
 import streamlit.components.v1 as components
+import selenium
 from selenium import webdriver
 from dataclasses import dataclass
 from etherscan import get_etherscan_output
