@@ -15,10 +15,7 @@ from bscscan import display_bsc_stats
 from polyscan import display_poly_stats
 from all_networks import get_all_networks_output
 from PIL import Image
-# from selenium.webdriver.firefox.options import Options
-# firefox_options = Options()
-# firefox_options.add_argument("--headless")
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options
 firefox_options = Options()
 firefox_options.add_argument("--headless")
 
@@ -51,7 +48,7 @@ def show_statistics_all_networks(statistics: Statistics):
 
 @st.cache
 def get_statistics_from_all_networks() -> Statistics:
-    driver = webdriver.Chrome(options=firefox_options)
+    driver = webdriver.Firefox(options=firefox_options)
     etherscan_stats = get_etherscan_output(driver)
     bscscan_stats = get_bscscan_output(driver)
     polyscan_stats = get_polyscan_output(driver)
