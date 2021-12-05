@@ -10,9 +10,10 @@ numpy = "^1.21.4"
 pandas = "^1.3.4"
 selenium = "^4.1.0"
 streamlit = "^1.2.0"
+seleniumbase = "^2.2.7"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
+pytest = "6.2.5"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
