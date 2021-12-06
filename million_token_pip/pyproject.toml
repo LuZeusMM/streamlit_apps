@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "million_token"
+version = "0.1.0"
+description = ""
+authors = ["LuZeusMM <mike_schank93@hotmail.com>"]
+
+[tool.poetry.dependencies]
+python = " >=3.7.1,<3.11"
+numpy = "^1.21.4"
+pandas = "^1.3.4"
+streamlit = "^1.2.0"
+beautifulsoup4 = "^4.10.0"
+HTMLParser = "^0.0.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "6.2.5"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
