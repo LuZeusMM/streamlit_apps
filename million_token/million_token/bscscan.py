@@ -1,8 +1,10 @@
+from urllib.request import Request, urlopen
 import numpy as np
 import streamlit as st
 from dataclasses import dataclass
-from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
+from scrap_token_values import find_price_values
+from scrap_token_values import find_market_cap
 
 
 @dataclass
@@ -15,9 +17,8 @@ class BscscanStatistics:
     holders: int
 
 
-def get_bscscan_output(driver: WebDriver, display=True) -> BscscanStatistics:
-    bscscan_stats = get_bsc_stats(driver=driver)
-
+def get_bscscan_output() -> BscscanStatistics:
+    bscscan_stats = get_bsc_stats()
     return bscscan_stats
 
 
@@ -34,38 +35,46 @@ def display_bsc_stats(stats: BscscanStatistics):
         market_cap_column.metric(label='Market Capitalization',
                                  value=stats.market_cap)
         holders_column.metric(label='Holders', value=stats.holders)
-        st.subheader("To see the chart, click [here](https://www.defined.fi/bsc/0x7cb5e7048215f7c225a8248b4c33fd32ca579c75?cache=6ad2c)")
+        st.subheader(
+            "To see the chart, click [here](https://www.defined.fi/bsc/0x7cb5e7048215f7c225a8248b4c33fd32ca579c75?cache=6ad2c)")
 
 
-def get_bsc_stats(driver: WebDriver) -> BscscanStatistics:
+def get_bsc_stats() -> BscscanStatistics:
     """ Extracts basic statistical information from Etherscan. """
-    driver.get('https://bscscan.com/token/0xbf05279f9bf1ce69bbfed670813b7e431142afa4')
-    current_holders = get_current_holders_bsc(driver=driver)
-    etherscan_stats = get_market_values_bsc(driver=driver, holders=current_holders)
-    etherscan_stats.holders = current_holders
-    return etherscan_stats
+    current_holders = get_current_holders_bsc()
+    bscscan_stats = get_market_values_bsc(holders=current_holders)
+    bscscan_stats.holders = current_holders
+    return bscscan_stats
 
 
-def get_current_holders_bsc(driver: WebDriver) -> int:
+def get_current_holders_bsc() -> int:
     """ Returns the number of current holders on the Ethereum network. """
-    current_holders = driver.find_element(By.CLASS_NAME, 'mr-3').text.split()[0].replace(',', '')
+    url = 'https://bscscan.com/token/0xbf05279f9bf1ce69bbfed670813b7e431142afa4'
+    request = Request(url, headers={'User-Agent': 'XYZ/3.0'})
+    response = urlopen(request, timeout=20).read()
+    soup = BeautifulSoup(response, 'html.parser')
+    holders = soup.find('div', class_='mr-3')
+    current_holders = holders.text.split()[0].replace(',', '')
     return int(current_holders)
 
 
-def get_market_values_bsc(driver, holders: int) -> BscscanStatistics:
+def get_market_values_bsc(holders: int) -> BscscanStatistics:
     """ Returns the current market values of Million Token. """
-    market_values = []
-    for elem in driver.find_elements(By.XPATH, '//span[@class = "d-block"]'):
-        market_values.append(elem.text)
+    url = 'https://bscscan.com/token/0xbf05279f9bf1ce69bbfed670813b7e431142afa4'
+    req = Request(url, headers={'User-Agent': 'XYZ/3.0'})
+    response = urlopen(req, timeout=20).read()
 
-    price_usd = float(market_values[0].split()[0][1:].replace(',', ''))
-    price_increase = market_values[0].split()[4][1:-1].replace(',', '')
-    market_cap = float(market_values[1][1:].replace(',', ''))
+    price_usd, price_increase = find_price_values(response=response)
+    market_cap = find_market_cap(response=response)
 
-    etherscan_stats = BscscanStatistics(price_usd=price_usd,
-                                        price_eur=np.round(price_usd * 0.8843, 2),
-                                        price_delta=price_increase,
-                                        market_cap=str('$' + str(np.round(market_cap/1000000, 2)) + 'M'),
-                                        market_cap_f=market_cap,
-                                        holders=holders)
-    return etherscan_stats
+    bscscan_stats = BscscanStatistics(price_usd=price_usd,
+                                      price_eur=np.round(price_usd * 0.8843, 2),
+                                      price_delta=price_increase,
+                                      market_cap=str(
+                                          '$' + str(np.round(market_cap / 1000000, 2)) + 'M'),
+                                      market_cap_f=market_cap,
+                                      holders=holders)
+    return bscscan_stats
+
+
+
